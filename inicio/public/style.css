@@ -58,3 +58,18 @@ main {
 .login-box button:hover {
   background: #d85858;
 }
+
+.register-text {
+  margin-top: 1rem;
+  font-size: 14px;
+}
+
+.register-text a {
+  color: #6c63ff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.register-text a:hover {
+  text-decoration: underline;
+}
