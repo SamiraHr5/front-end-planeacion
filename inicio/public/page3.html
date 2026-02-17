@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tablero de Eventos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1 class="center">Gestor administrativo tech mahindra</h1>
+    <img src="img/Tech_Mahindra.png" alt="Tech Mahindra" class="logo">
+  </header>
+
+  <main>
+    <div class="login-box">
+      <h2>Tablero de eventos</h2>
+
+      <form id="eventForm" class="event-form">
+        <input id="title" type="text" placeholder="Título del evento" required>
+        <input id="date" type="date" required>
+        <input id="time" type="time" required>
+        <input id="place" type="text" placeholder="Lugar (opcional)">
+        <button type="submit">Agregar evento</button>
+      </form>
+
+      <div class="events-header">
+        <h3>Mis eventos</h3>
+        <button id="clearBtn" class="btn-secondary" type="button">Borrar todo</button>
+      </div>
+
+      <ul id="eventsList" class="events-list"></ul>
+      <p class="register-text">
+        <a href="page4.html">Ver equipo</a>
+      </p>
+
+      <p class="register-text">
+        <a href="index.html">Cerrar sesión</a>
+      </p>
+      
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById("eventForm");
+    const list = document.getElementById("eventsList");
+    const clearBtn = document.getElementById("clearBtn");
+
+    function loadEvents() {
+      return JSON.parse(localStorage.getItem("events") || "[]");
+    }
+
+    function saveEvents(events) {
+      localStorage.setItem("events", JSON.stringify(events));
+    }
+
+    function render() {
+      const events = loadEvents();
+      list.innerHTML = "";
+
+      if (events.length === 0) {
+        const li = document.createElement("li");
+        li.className = "event-item empty";
+        li.textContent = "No hay eventos todavía.";
+        list.appendChild(li);
+        return;
+      }
+
+      events
+        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+        .forEach((ev, idx) => {
+          const li = document.createElement("li");
+          li.className = "event-item";
+
+          li.innerHTML = `
+            <div class="event-main">
+              <strong>${ev.title}</strong>
+              <div class="event-meta">
+                ${ev.date} • ${ev.time}${ev.place ? " • " + ev.place : ""}
+              </div>
+            </div>
+            <button class="btn-danger" data-idx="${idx}" type="button">Eliminar</button>
+          `;
+
+          list.appendChild(li);
+        });
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const events = loadEvents();
+
+      const ev = {
+        title: document.getElementById("title").value.trim(),
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value,
+        place: document.getElementById("place").value.trim(),
+      };
+
+      events.push(ev);
+      saveEvents(events);
+      form.reset();
+      render();
+    });
+
+    list.addEventListener("click", (e) => {
+      if (!e.target.classList.contains("btn-danger")) return;
+      const idx = Number(e.target.dataset.idx);
+      const events = loadEvents();
+      events.splice(idx, 1);
+      saveEvents(events);
+      render();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      localStorage.removeItem("events");
+      render();
+    });
+
+    render();
+  </script>
+<footer>
+  © 2026 Tech Mahindra - Sistema interno
+</footer>
+</body>
+</html>

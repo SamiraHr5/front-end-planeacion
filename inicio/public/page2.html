@@ -16,12 +16,14 @@
     <div class="login-box">
       <h2>Crear cuenta</h2>
 
-      <input type="text" placeholder="Nombre completo">
-      <input type="email" placeholder="Correo electrónico">
-      <input type="text" placeholder="Usuario">
-      <input type="password" placeholder="Contraseña">
+      <form id="registerForm">
+        <input type="text" placeholder="Nombre completo" required>
+        <input type="email" placeholder="Correo electrónico" required>
+        <input type="text" placeholder="Usuario" required>
+        <input type="password" placeholder="Contraseña" required>
 
-      <button>Registrarse</button>
+        <button type="submit">Registrarse</button>
+      </form>
 
       <p class="register-text">
         ¿Ya tienes cuenta?
@@ -30,5 +32,15 @@
     </div>
   </main>
 
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+      e.preventDefault(); 
+      // Aquí luego podrías guardar datos
+      window.location.href = "page3.html";
+    });
+  </script>
+<footer>
+  © 2026 Tech Mahindra - Sistema interno
+</footer>
 </body>
 </html>

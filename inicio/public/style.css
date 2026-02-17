@@ -2,6 +2,9 @@ body {
   margin: 0;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   background: #871919;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 header{
@@ -22,6 +25,7 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex: 1;
 }
 
 .login-box {
@@ -72,4 +76,31 @@ main {
 
 .register-text a:hover {
   text-decoration: underline;
+}
+
+footer {
+  background: #222;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  font-size: 14px;
+}
+
+.team-card {
+  border: 1px solid #eee;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #fafafa;
+  text-align: left;
+}
+
+.team-card h3 {
+  margin: 0;
+}
+
+.team-card p {
+  margin: 5px 0 0;
+  color: #555;
+  font-size: 14px;
 }
