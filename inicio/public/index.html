@@ -17,11 +17,12 @@
       <h2>Iniciar sesión</h2>
 
       <form id="loginForm">
-        <input type="text" id="usuario" placeholder="Usuario" required>
-        <input type="password" id="contrasena" placeholder="Contraseña" required>
-
+        <input type="text" id="usuario" name="username" placeholder="Usuario" required>
+        <input type="password" id="contrasena" name="password" placeholder="Contraseña" required>
         <button type="submit">Entrar</button>
       </form>
+
+      <p id="loginError" style="margin-top:10px; color:#e74c3c; display:none;"></p>
 
       <p class="register-text">
         ¿No tienes cuenta?
@@ -31,20 +32,35 @@
   </main>
 
   <script>
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
+    const form = document.getElementById("loginForm");
+    const err = document.getElementById("loginError");
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      err.style.display = "none";
+      err.textContent = "";
 
-      const usuario = document.getElementById("usuario").value.trim();
-      const contrasena = document.getElementById("contrasena").value.trim();
+      const body = {
+        username: document.getElementById("usuario").value.trim(),
+        password: document.getElementById("contrasena").value.trim(),
+      };
 
-      if (usuario !== "" && contrasena !== "") {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.ok) {
         window.location.href = "page3.html";
+      } else {
+        err.textContent = data.message || "Error al iniciar sesión.";
+        err.style.display = "block";
       }
     });
   </script>
-<footer>
-  © 2026 Tech Mahindra - Sistema interno
-</footer>
 
 </body>
 </html>
