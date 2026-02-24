@@ -3,73 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <title>Registro</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-  <header>
-    <h1 class="center">Gestor administrativo tech mahindra</h1>
-    <img src="img/Tech_Mahindra.png" alt="Tech Mahindra" class="logo">
-  </header>
+<header>
+  <h1 class="center">Gestor administrativo tech mahindra</h1>
+  <img src="/img/Tech_Mahindra.png" class="logo" alt="Tech Mahindra">
+</header>
 
-  <main>
-    <div class="login-box">
-      <h2>Crear cuenta</h2>
+<main>
+  <div class="login-box">
+    <h2>Crear cuenta</h2>
 
-      <form id="registerForm">
-        <input type="text" id="name" name="name" placeholder="Nombre completo" required>
-        <input type="email" id="email" name="email" placeholder="Correo electrónico" required>
-        <input type="text" id="username" name="username" placeholder="Usuario" required>
-        <input type="password" id="password" name="password" placeholder="Contraseña" required>
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="Nombre completo" required>
+      <input type="email" id="email" placeholder="Correo" required>
+      <input type="text" id="username" placeholder="Usuario" required>
+      <input type="password" id="password" placeholder="Contraseña" required>
+      <button type="submit">Registrarse</button>
+    </form>
 
-        <button type="submit">Registrarse</button>
-      </form>
+    <p id="msg" style="display:none; margin-top:10px;"></p>
 
-      <p id="regMsg" style="margin-top:10px; display:none;"></p>
+    <p class="register-text">
+      <a href="/">Volver al login</a>
+    </p>
+  </div>
+</main>
 
-      <p class="register-text">
-        ¿Ya tienes cuenta?
-        <a href="index.html">Iniciar sesión</a>
-      </p>
-    </div>
-  </main>
+<footer>
+  © 2026 Tech Mahindra
+</footer>
 
-  <script>
-    const form = document.getElementById("registerForm");
-    const msg = document.getElementById("regMsg");
+<script>
+  const form = document.getElementById("registerForm");
+  const msg = document.getElementById("msg");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      msg.style.display = "none";
-      msg.textContent = "";
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.style.display = "none";
+    msg.textContent = "";
 
-      const body = {
-        name: document.getElementById("name").value.trim(),
-        email: document.getElementById("email").value.trim(),
-        username: document.getElementById("username").value.trim(),
-        password: document.getElementById("password").value.trim(),
-      };
+    const body = {
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      username: document.getElementById("username").value.trim(),
+      password: document.getElementById("password").value.trim(),
+    };
 
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.ok) {
-        msg.style.color = "green";
-        msg.textContent = "Registro exitoso. Redirigiendo al login...";
-        msg.style.display = "block";
-        setTimeout(() => (window.location.href = "index.html"), 800);
-      } else {
-        msg.style.color = "#e74c3c";
-        msg.textContent = data.message || "Error al registrar.";
-        msg.style.display = "block";
-      }
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
-  </script>
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.ok) {
+      msg.style.color = "green";
+      msg.textContent = "Registro exitoso. Redirigiendo al login...";
+      msg.style.display = "block";
+      setTimeout(() => (window.location.href = "/"), 800);
+    } else {
+      msg.style.color = "red";
+      msg.textContent = data.message || "Error al registrar.";
+      msg.style.display = "block";
+    }
+  });
+</script>
 
 </body>
 </html>

@@ -3,64 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-  <header>
-    <h1 class="center">Gestor administrativo tech mahindra</h1>
-    <img src="img/Tech_Mahindra.png" alt="Tech Mahindra" class="logo">
-  </header>
+<header>
+  <h1 class="center">Gestor administrativo tech mahindra</h1>
+  <img src="/img/Tech_Mahindra.png" class="logo" alt="Tech Mahindra">
+</header>
 
-  <main>
-    <div class="login-box">
-      <h2>Iniciar sesión</h2>
+<main>
+  <div class="login-box">
+    <h2>Iniciar sesión</h2>
 
-      <form id="loginForm">
-        <input type="text" id="usuario" name="username" placeholder="Usuario" required>
-        <input type="password" id="contrasena" name="password" placeholder="Contraseña" required>
-        <button type="submit">Entrar</button>
-      </form>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Usuario" required>
+      <input type="password" id="password" placeholder="Contraseña" required>
+      <button type="submit">Entrar</button>
+    </form>
 
-      <p id="loginError" style="margin-top:10px; color:#e74c3c; display:none;"></p>
+    <!-- ✅ aquí sale el error -->
+    <p id="error" style="display:none; margin-top:10px;"></p>
 
-      <p class="register-text">
-        ¿No tienes cuenta?
-        <a href="page2.html">Regístrate</a>
-      </p>
-    </div>
-  </main>
+    <p class="register-text">
+      ¿No tienes cuenta?
+      <a href="/page2.html">Regístrate</a>
+    </p>
+  </div>
+</main>
 
-  <script>
-    const form = document.getElementById("loginForm");
-    const err = document.getElementById("loginError");
+<footer>
+  © 2026 Tech Mahindra
+</footer>
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      err.style.display = "none";
-      err.textContent = "";
+<script>
+  const form = document.getElementById("loginForm");
+  const error = document.getElementById("error");
 
-      const body = {
-        username: document.getElementById("usuario").value.trim(),
-        password: document.getElementById("contrasena").value.trim(),
-      };
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    error.style.display = "none";
+    error.textContent = "";
 
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+    const body = {
+      username: document.getElementById("username").value.trim(),
+      password: document.getElementById("password").value.trim(),
+    };
 
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok && data.ok) {
-        window.location.href = "page3.html";
-      } else {
-        err.textContent = data.message || "Error al iniciar sesión.";
-        err.style.display = "block";
-      }
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
-  </script>
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.ok) {
+      window.location.href = "/app/page3";
+    } else {
+      error.style.color = "red";
+      error.textContent = data.message || "Cuenta no encontrada o contraseña incorrecta.";
+      error.style.display = "block";
+    }
+  });
+</script>
 
 </body>
 </html>

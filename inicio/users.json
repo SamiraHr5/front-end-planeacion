@@ -5,5 +5,19 @@
     "email": "prueba@gmail.com",
     "username": "prueba",
     "password": "prueba"
+  },
+  {
+    "id": 1771965234075,
+    "name": "samira",
+    "email": "samira@gmail.com",
+    "username": "samirah",
+    "password": "reo"
+  },
+  {
+    "id": 1771966203149,
+    "name": "samirah2",
+    "email": "samira2@gmail.com",
+    "username": "samirah2",
+    "password": "reo2"
   }
 ]
