@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pokédex</title>
+  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    /*varias tarjetas por fila */
+    .login-box{
+      max-width:1100px;
+      width:95%;
+    }
+
+    /*filtros*/
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:12px 0;
+    }
+
+    .controls input, .controls select{
+      padding:10px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      min-width:170px;
+      flex:1;
+    }
+
+    /*tarjetas en fila*/
+    .grid{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      justify-content:center;
+    }
+
+    /*card*/
+    .poke-card{
+      border:1px solid #eee;
+      border-radius:12px;
+      padding:12px;
+      background:#fafafa;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      width:240px;
+    }
+
+    .poke-card img{
+      width:80px;
+      height:80px;
+      image-rendering:pixelated;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 8px;
+      border:1px solid #ddd;
+      border-radius:999px;
+      font-size:12px;
+      margin-right:5px;
+      margin-top:6px;
+      background:white;
+    }
+
+    .btn{
+      padding:10px 12px;
+      border:none;
+      border-radius:10px;
+      background:#8b2a25; 
+      color:white;
+      cursor:pointer;
+      width:100%;
+      margin-top:6px;
+    }
+
+    .muted{
+      color:#777;
+      font-size:13px;
+      margin-top:8px;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1 class="center">Gestor administrativo tech mahindra</h1>
+  <img src="/img/Tech_Mahindra.png" class="logo" alt="Tech Mahindra">
+</header>
+
+<main>
+  <div class="login-box">
+    <h2>Pokédex (PokeAPI)</h2>
+
+    <!--filtros-->
+    <div class="controls">
+      <input id="nameFilter" type="text" placeholder="Nombre (ej: pika)">
+      <input id="idFilter" type="number" min="1" placeholder="ID (ej: 25)">
+      <select id="typeFilter">
+        <option value="">Tipo (todos)</option>
+      </select>
+    </div>
+
+    <button class="btn" id="loadMoreBtn">Cargar más</button>
+    <div class="muted" id="status">Cargando...</div>
+    <div id="grid" class="grid" style="margin-top:12px;"></div>
+
+    <p class="register-text" style="margin-top:14px;">
+      <a href="/app/page4">Volver</a>
+    </p>
+  </div>
+</main>
+
+<footer>
+  © 2026 Tech Mahindra
+</footer>
+
+<script>
+  const grid = document.getElementById("grid");             // donde van las tarjetas
+  const statusEl = document.getElementById("status");       // texto de estado
+  const nameFilter = document.getElementById("nameFilter"); // filtro nombre
+  const idFilter = document.getElementById("idFilter");     // filtro id
+  const typeFilter = document.getElementById("typeFilter"); // filtro tipo
+  const loadMoreBtn = document.getElementById("loadMoreBtn");// boton
+
+  // Estado
+  let pokemonList = [];   // lista base: {id, name}
+  let filteredIds = [];   // ids filtrados
+  let index = 0;        
+  const PAGE_SIZE = 30;   // cuantos cargar por click
+
+  const cache = new Map(); 
+  function setStatus(text){
+    statusEl.textContent = text;
+  }
+
+  function getIdFromUrl(url){
+    const match = url.match(/\/pokemon\/(\d+)\//);
+    return match ? Number(match[1]) : null;
+  }
+
+  function titleCase(s){
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  async function fetchJson(url){
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+
+  //trae info completa del pokemon
+  async function getPokemon(id){
+    if(cache.has(id)) return cache.get(id);
+
+    const data = await fetchJson(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    cache.set(id, data);
+    return data;
+  }
+
+  //dibuja tarjeta
+  function renderCard(p){
+    const name = titleCase(p.name);
+    const sprite = p.sprites?.front_default || "";
+    const types = (p.types || []).map(t => t.type.name);
+
+    const badges = types.map(t => `<span class="badge">${t}</span>`).join("");
+
+    grid.insertAdjacentHTML("beforeend", `
+      <div class="poke-card">
+        <img src="${sprite}" alt="${name}">
+        <div>
+          <strong>${name}</strong> #${p.id}
+          <div>${badges}</div>
+        </div>
+      </div>
+    `);
+  }
+
+  //cargar lista base 
+  async function loadPokemonList(){
+    setStatus("Cargando lista de Pokémon...");
+    const data = await fetchJson("https://pokeapi.co/api/v2/pokemon?limit=100000");
+
+    pokemonList = (data.results || [])
+      .map(p => ({
+        id: getIdFromUrl(p.url),
+        name: p.name
+      }))
+      .filter(p => p.id !== null);
+  }
+
+  //cargar tipos en el select
+  async function loadTypes(){
+    setStatus("Cargando tipos...");
+    const data = await fetchJson("https://pokeapi.co/api/v2/type");
+
+    const types = (data.results || [])
+      .map(t => t.name)
+      .sort();
+
+    for(const t of types){
+      const option = document.createElement("option");
+      option.value = t;
+      option.textContent = t;
+      typeFilter.appendChild(option);
+    }
+  }
+
+  //aplicar filtros
+  async function applyFilters(){
+    const nameQ = nameFilter.value.trim().toLowerCase(); // nombre
+    const idQ = idFilter.value.trim();                   // id
+    const typeQ = typeFilter.value;                      // tipo
+
+    let base = pokemonList;
+
+    //filtro por nombre
+    if(nameQ) base = base.filter(p => p.name.includes(nameQ));
+
+    //filtro por id
+    if(idQ) base = base.filter(p => p.id === Number(idQ));
+
+    //si NO hay filtro por tipo, solo guardo ids
+    if(!typeQ){
+      filteredIds = base.map(p => p.id);
+      index = 0;
+      grid.innerHTML = "";
+      setStatus("Listo.");
+      return;
+    }
+
+    //filtro por tipo 
+    setStatus("Filtrando por tipo (puede tardar un poco)...");
+    filteredIds = [];
+    index = 0;
+    grid.innerHTML = "";
+
+    for(const p of base){
+      const detail = await getPokemon(p.id);
+      const types = (detail.types || []).map(t => t.type.name);
+      if(types.includes(typeQ)) filteredIds.push(p.id);
+    }
+
+    setStatus("Listo.");
+  }
+
+  //cargar mas tarjetas
+  async function loadMore(){
+    const end = Math.min(index + PAGE_SIZE, filteredIds.length);
+
+    if(index >= filteredIds.length){
+      setStatus("No hay más resultados.");
+      return;
+    }
+
+    setStatus("Cargando tarjetas...");
+
+    for(let i = index; i < end; i++){
+      const id = filteredIds[i];
+      const detail = await getPokemon(id);
+      renderCard(detail);
+    }
+
+    index = end;
+    setStatus("Listo.");
+  }
+
+  // =========================
+  // Eventos
+  // =========================
+  nameFilter.addEventListener("input", async () => {
+    await applyFilters();
+    await loadMore();
+  });
+
+  idFilter.addEventListener("input", async () => {
+    await applyFilters();
+    await loadMore();
+  });
+
+  typeFilter.addEventListener("change", async () => {
+    await applyFilters();
+    await loadMore();
+  });
+
+  loadMoreBtn.addEventListener("click", loadMore);
+
+
+  //inicio
+  (async function init(){
+    try{
+      await loadPokemonList(); // lista base
+      await loadTypes();       // llena el select
+      await applyFilters();    // filtros iniciales
+      await loadMore();        // primera carga
+    } catch(e){
+      setStatus("Error conectando con PokeAPI.");
+    }
+  })();
+</script>
+
+</body>
+</html>

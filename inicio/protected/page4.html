@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Equipo</title>
   <link rel="stylesheet" href="/style.css">
-  <style> 
+
+  <style>
     .pokemon-card{
       border: 1px solid #eee;
       border-radius: 10px;
@@ -15,26 +16,41 @@
       align-items: center;
       gap: 14px;
     }
+
     .pokemon-card img{
       width: 96px;
       height: 96px;
       image-rendering: pixelated;
     }
+
     .pokemon-card h3{ margin: 0; }
-    .pokemon-card p{ margin: 6px 0 0; color:#555; font-size: 14px; }
-    .row-actions{ display:flex; gap:10px; margin-top:10px; }
+
+    .pokemon-card p{
+      margin: 6px 0 0;
+      color:#555;
+      font-size: 14px;
+    }
+
+    .row-actions{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+    }
   </style>
+
 </head>
+
 <body>
 
 <header>
   <h1 class="center">Gestor administrativo tech mahindra</h1>
-  <img src="/img/Tech_Mahindra.png" class="logo" alt="Tech Mahindra">
+  <img src="/img/Tech_Mahindra.png" class="logo">
   <button onclick="logout()" style="margin-left:20px;">Cerrar sesión</button>
 </header>
 
 <main>
   <div class="login-box">
+
     <h2>Equipo</h2>
 
     <div class="team-card">
@@ -57,112 +73,160 @@
       <p>Administrador de Sistemas</p>
     </div>
 
+
     <h2 style="margin-top:18px;">Pokémon</h2>
 
     <form id="pokemonForm">
+
       <input id="pokemonInput" type="text" placeholder="Ej: pikachu o 25" required>
+
       <div class="row-actions">
         <button type="submit">Buscar</button>
         <button type="button" id="randomBtn">Random</button>
       </div>
+
     </form>
+
 
     <p id="pokeMsg" style="display:none; margin-top:10px;"></p>
 
+
     <div id="pokemonCard" class="pokemon-card" style="display:none;">
-      <img id="pokemonImg" alt="Pokemon sprite">
+
+      <img id="pokemonImg">
+
       <div>
         <h3 id="pokemonName"></h3>
         <p id="pokemonInfo"></p>
       </div>
+
     </div>
+
 
     <p class="register-text" style="margin-top:14px;">
       <a href="/app/page3">Volver al tablero</a>
     </p>
+
+    <p class="register-text">
+      <a href="/app/page5">Ir a Pokédex</a>
+    </p>
+
   </div>
 </main>
+
 
 <footer>
   © 2026 Tech Mahindra
 </footer>
 
+
 <script>
-  async function logout(){
-    await fetch("/api/logout", { method:"POST" });
-    window.location.href="/";
-  }
 
-  const form = document.getElementById("pokemonForm");
-  const input = document.getElementById("pokemonInput");
-  const msg = document.getElementById("pokeMsg");
+async function logout(){
 
-  const card = document.getElementById("pokemonCard");
-  const img = document.getElementById("pokemonImg");
-  const nameEl = document.getElementById("pokemonName");
-  const infoEl = document.getElementById("pokemonInfo");
+  await fetch("/api/logout", { method:"POST" });
 
-  function showMsg(text, color="red"){
-    msg.style.display = "block";
-    msg.style.color = color;
-    msg.textContent = text;
-  }
+  window.location.href="/";
 
-  function hideMsg(){
-    msg.style.display = "none";
-    msg.textContent = "";
-  }
+}
 
-  async function loadPokemon(query){
-    hideMsg();
-    card.style.display = "none";
 
-    const q = String(query).trim().toLowerCase();
-    if(!q) return;
+const form = document.getElementById("pokemonForm");
+const input = document.getElementById("pokemonInput");
+const msg = document.getElementById("pokeMsg");
 
-    try{
-      //endpoint
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(q)}`);
-      if(!res.ok){
-        showMsg("No existe ese Pokémon. Intenta otro nombre o ID.");
-        return;
-      }
+const card = document.getElementById("pokemonCard");
+const img = document.getElementById("pokemonImg");
+const nameEl = document.getElementById("pokemonName");
+const infoEl = document.getElementById("pokemonInfo");
 
-      const data = await res.json();
 
-      const pokemonName = data.name.toUpperCase();
-      const sprite = data.sprites?.front_default;
-      const id = data.id;
+function showMsg(text,color="red"){
 
-      if(!sprite){
-        showMsg("Este Pokémon no tiene sprite disponible.", "orange");
-      }
+  msg.style.display="block";
+  msg.style.color=color;
+  msg.textContent=text;
 
-      nameEl.textContent = `${pokemonName} (#${id})`;
-      img.src = sprite || "";
-      img.alt = pokemonName;
+}
 
-      const types = (data.types || []).map(t => t.type.name).join(", ");
-      infoEl.textContent = `Tipo(s): ${types || "N/A"}`;
 
-      card.style.display = "flex";
-    } catch(e){
-      showMsg("Error al conectar con PokeAPI. Reintenta.");
+function hideMsg(){
+
+  msg.style.display="none";
+  msg.textContent="";
+
+}
+
+
+async function loadPokemon(query){
+
+  hideMsg();
+  card.style.display="none";
+
+  const q = String(query).trim().toLowerCase();
+
+  if(!q) return;
+
+  try{
+
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(q)}`);
+
+    if(!res.ok){
+
+      showMsg("No existe ese Pokémon. Intenta otro nombre o ID.");
+      return;
+
     }
+
+    const data = await res.json();
+
+    const pokemonName = data.name.toUpperCase();
+    const sprite = data.sprites?.front_default;
+    const id = data.id;
+
+    nameEl.textContent=`${pokemonName} (#${id})`;
+
+    img.src=sprite || "";
+
+    const types=(data.types || []).map(t=>t.type.name).join(", ");
+
+    infoEl.textContent=`Tipo(s): ${types || "N/A"}`;
+
+    card.style.display="flex";
+
   }
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    loadPokemon(input.value);
-  });
+  catch(e){
 
-  document.getElementById("randomBtn").addEventListener("click", () => {
-    const randomId = Math.floor(Math.random() * 1025) + 1;
-    input.value = randomId;
-    loadPokemon(randomId);
-  });
+    showMsg("Error al conectar con PokeAPI");
 
-  loadPokemon("pikachu");
+  }
+
+}
+
+
+form.addEventListener("submit",(e)=>{
+
+  e.preventDefault();
+
+  loadPokemon(input.value);
+
+});
+
+
+document.getElementById("randomBtn").addEventListener("click",()=>{
+
+  const randomId=Math.floor(Math.random()*1025)+1;
+
+  input.value=randomId;
+
+  loadPokemon(randomId);
+
+});
+
+
+loadPokemon("pikachu");
+
 </script>
 
 </body>

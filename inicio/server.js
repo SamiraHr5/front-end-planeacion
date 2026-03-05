@@ -126,3 +126,7 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
+
+app.get("/app/page5", authMiddleware, (req, res) => {
+  res.sendFile(path.join(PROTECTED_DIR, "page5.html"));
+});
