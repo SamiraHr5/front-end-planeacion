@@ -217,9 +217,7 @@ form.addEventListener("submit",(e)=>{
 document.getElementById("randomBtn").addEventListener("click",()=>{
 
   const randomId=Math.floor(Math.random()*1025)+1;
-
   input.value=randomId;
-
   loadPokemon(randomId);
 
 });

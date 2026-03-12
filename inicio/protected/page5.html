@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="/style.css">
 
   <style>
-    /*varias tarjetas por fila */
+    /*varias tarjetas por fila*/
     .login-box{
       max-width:1100px;
       width:95%;
@@ -112,6 +112,9 @@
     <p class="register-text" style="margin-top:14px;">
       <a href="/app/page4">Volver</a>
     </p>
+    <p class="register-text">
+  <a href="/app/page6">Ir a batalla Pokémon</a>
+</p>
   </div>
 </main>
 
@@ -120,18 +123,18 @@
 </footer>
 
 <script>
-  const grid = document.getElementById("grid");             // donde van las tarjetas
-  const statusEl = document.getElementById("status");       // texto de estado
-  const nameFilter = document.getElementById("nameFilter"); // filtro nombre
-  const idFilter = document.getElementById("idFilter");     // filtro id
-  const typeFilter = document.getElementById("typeFilter"); // filtro tipo
-  const loadMoreBtn = document.getElementById("loadMoreBtn");// boton
+  const grid = document.getElementById("grid"); //donde van las tarjetas
+  const statusEl = document.getElementById("status"); //texto de estado
+  const nameFilter = document.getElementById("nameFilter"); //filtro nombre
+  const idFilter = document.getElementById("idFilter"); //filtro id
+  const typeFilter = document.getElementById("typeFilter"); //filtro tipo
+  const loadMoreBtn = document.getElementById("loadMoreBtn");//boton
 
-  // Estado
-  let pokemonList = [];   // lista base: {id, name}
-  let filteredIds = [];   // ids filtrados
+  //Estado
+  let pokemonList = [];   //lista base: {id, name}
+  let filteredIds = [];   //ids filtrados
   let index = 0;        
-  const PAGE_SIZE = 30;   // cuantos cargar por click
+  const PAGE_SIZE = 30;   //cuantos cargar por click
 
   const cache = new Map(); 
   function setStatus(text){
@@ -213,9 +216,9 @@
 
   //aplicar filtros
   async function applyFilters(){
-    const nameQ = nameFilter.value.trim().toLowerCase(); // nombre
-    const idQ = idFilter.value.trim();                   // id
-    const typeQ = typeFilter.value;                      // tipo
+    const nameQ = nameFilter.value.trim().toLowerCase(); //nombre
+    const idQ = idFilter.value.trim();                   //id
+    const typeQ = typeFilter.value;                      //tipo
 
     let base = pokemonList;
 
@@ -270,9 +273,7 @@
     setStatus("Listo.");
   }
 
-  // =========================
-  // Eventos
-  // =========================
+
   nameFilter.addEventListener("input", async () => {
     await applyFilters();
     await loadMore();
@@ -294,14 +295,15 @@
   //inicio
   (async function init(){
     try{
-      await loadPokemonList(); // lista base
-      await loadTypes();       // llena el select
-      await applyFilters();    // filtros iniciales
-      await loadMore();        // primera carga
+      await loadPokemonList(); //lista base
+      await loadTypes();       //llena el select
+      await applyFilters();    //filtros iniciales
+      await loadMore();        //primera carga
     } catch(e){
       setStatus("Error conectando con PokeAPI.");
     }
   })();
+  
 </script>
 
 </body>

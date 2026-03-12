@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
-const cookieParser = require("cookie-parser"); // ✅ arriba
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const PORT = 3000;
@@ -32,7 +32,7 @@ function writeUsers(users) {
   fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2), "utf-8");
 }
 
-// ✅ ahora lee token de HEADER o COOKIE
+//ahora lee token de HEADER o COOKIE
 function authMiddleware(req, res, next) {
   const auth = req.headers.authorization || "";
   const headerToken = auth.startsWith("Bearer ") ? auth.slice(7) : null;
@@ -70,7 +70,7 @@ app.post("/api/register", (req, res) => {
   return res.json({ ok: true });
 });
 
-// login: ✅ guarda token en COOKIE
+// login: guarda token en COOKIE
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -89,7 +89,7 @@ app.post("/api/login", (req, res) => {
   const token = crypto.randomBytes(24).toString("hex");
   sessions.set(token, user.id);
 
-  // ✅ cookie para que el navegador la mande solo
+  //cookie para que el navegador la mande solo
   res.cookie("token", token, {
     httpOnly: true,
     sameSite: "lax",
@@ -104,7 +104,7 @@ app.get("/api/me", authMiddleware, (req, res) => {
   return res.json({ ok: true, userId: req.userId });
 });
 
-// logout: ✅ borra cookie y sesión
+// logout: borra cookie y sesión
 app.post("/api/logout", authMiddleware, (req, res) => {
   sessions.delete(req.token);
   res.clearCookie("token");
@@ -129,4 +129,8 @@ app.listen(PORT, () => console.log(`http://localhost:${PORT}`));
 
 app.get("/app/page5", authMiddleware, (req, res) => {
   res.sendFile(path.join(PROTECTED_DIR, "page5.html"));
+});
+
+app.get("/app/page6", authMiddleware, (req, res) => {
+  res.sendFile(path.join(PROTECTED_DIR, "page6.html"));
 });

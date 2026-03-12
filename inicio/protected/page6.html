@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Batalla Pokémon</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .battle-box{
+      max-width: 1100px;
+      width: 95%;
+      margin: 0 auto;
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .picker-row{
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .picker-row input,
+    .picker-row button{
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    .picker-row button,
+    .action-btn{
+        background: #8b2a25;
+        color: white;
+        border: none;
+        cursor: pointer;
+        padding: 10px 18px;
+        border-radius: 999px; /* hace el botón redondo */
+        font-weight: bold;
+    }
+
+    .arena{
+      display: grid;
+      grid-template-columns: 1fr 320px 1fr;
+      gap: 18px;
+      align-items: start;
+      margin-top: 18px;
+    }
+
+    .poke-panel{
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .poke-panel img{
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+    }
+
+    .hp-wrap{
+      background: #ddd;
+      border-radius: 999px;
+      overflow: hidden;
+      height: 20px;
+      margin: 10px 0 6px;
+    }
+
+    .hp-bar{
+      background: #4caf50;
+      height: 100%;
+      width: 100%;
+      transition: width 0.4s ease;
+    }
+
+    .mid-panel{
+        background: #fafafa;        
+        border: 1px solid #eee;     
+        border-radius: 16px;
+        padding: 18px;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 14px;
+    }
+
+    .turn-box{
+        background: white;
+        border: 1px solid #eee;
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .log-box{
+      background: white;
+      color: #222;
+      border-radius: 12px;
+      padding: 14px;
+      max-height: 220px;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    .log-box ul{
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .controls{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .winner-screen{
+      display: none;
+      text-align: center;
+      margin-top: 24px;
+      background: #fff8e1;
+      border: 2px solid #f1c40f;
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .winner-screen img{
+      width: 220px;
+      height: 220px;
+      object-fit: contain;
+    }
+
+    .winner-title{
+      font-size: 30px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #8b2a25;
+    }
+
+    .muted{
+      color: #666;
+      font-size: 14px;
+    }
+
+    .shake{
+      animation: shake 0.45s;
+    }
+
+    @keyframes shake{
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      20% { transform: translate(-2px, 0px) rotate(-1deg); }
+      40% { transform: translate(2px, 1px) rotate(1deg); }
+      60% { transform: translate(-1px, 2px) rotate(0deg); }
+      80% { transform: translate(2px, -1px) rotate(1deg); }
+      100% { transform: translate(1px, 1px) rotate(0deg); }
+    }
+
+    @media (max-width: 900px){
+      .arena{
+        grid-template-columns: 1fr;
+      }
+
+      .picker-row{
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1 class="center">Gestor administrativo tech mahindra</h1>
+  <img src="/img/Tech_Mahindra.png" class="logo" alt="Tech Mahindra">
+</header>
+
+<main>
+  <div class="battle-box">
+    <h2>Batalla Pokémon</h2>
+    <p class="muted">
+      Reglas: ataque especial solo después de 3 turnos propios, defensa especial después de 2 turnos propios. 
+      Cualquier ataque o defensa puede fallar aleatoriamente.
+    </p>
+
+    <div class="picker-row">
+      <input id="poke1Input" list="pokemonList" placeholder="Pokémon 1 (ej: pikachu)" />
+      <input id="poke2Input" list="pokemonList" placeholder="Pokémon 2 (ej: charizard)" />
+      <button id="startBtn">Iniciar batalla</button>
+    </div>
+
+    <datalist id="pokemonList"></datalist>
+
+    <div class="arena">
+      <div class="poke-panel">
+        <h3 id="p1Name">Pokémon 1</h3>
+        <img id="p1Img" alt="Pokemon 1">
+        <div class="hp-wrap">
+          <div id="p1HpBar" class="hp-bar"></div>
+        </div>
+        <p><strong id="p1HpText">100</strong>% de vida</p>
+      </div>
+
+      <div class="mid-panel">
+        <div class="turn-box">
+          <h3 id="turnTitle">Esperando inicio</h3>
+          <p id="battleText">Selecciona dos Pokémon y presiona "Iniciar batalla".</p>
+        </div>
+
+        <div class="controls">
+          <button id="nextTurnBtn" class="action-btn" disabled>Siguiente turno</button>
+          <button id="restartBtn" class="action-btn">Reiniciar</button>
+          <a href="/app/page4" class="action-btn" style="text-decoration:none; display:inline-flex; align-items:center;">Volver</a>
+        </div>
+
+        <div class="log-box">
+          <h4>Historial</h4>
+          <ul id="battleLog"></ul>
+        </div>
+      </div>
+
+      <div class="poke-panel">
+        <h3 id="p2Name">Pokémon 2</h3>
+        <img id="p2Img" alt="Pokemon 2">
+        <div class="hp-wrap">
+          <div id="p2HpBar" class="hp-bar"></div>
+        </div>
+        <p><strong id="p2HpText">100</strong>% de vida</p>
+      </div>
+    </div>
+
+    <div id="winnerScreen" class="winner-screen">
+      <div class="winner-title">GANADOR</div>
+      <h2 id="winnerName">---</h2>
+      <img id="winnerImg" alt="Ganador">
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2026 Tech Mahindra
+</footer>
+
+<script>
+  const datalist = document.getElementById("pokemonList");
+  const poke1Input = document.getElementById("poke1Input");
+  const poke2Input = document.getElementById("poke2Input");
+  const startBtn = document.getElementById("startBtn");
+  const nextTurnBtn = document.getElementById("nextTurnBtn");
+  const restartBtn = document.getElementById("restartBtn");
+
+  const p1Name = document.getElementById("p1Name");
+  const p2Name = document.getElementById("p2Name");
+  const p1Img = document.getElementById("p1Img");
+  const p2Img = document.getElementById("p2Img");
+  const p1HpBar = document.getElementById("p1HpBar");
+  const p2HpBar = document.getElementById("p2HpBar");
+  const p1HpText = document.getElementById("p1HpText");
+  const p2HpText = document.getElementById("p2HpText");
+
+  const turnTitle = document.getElementById("turnTitle");
+  const battleText = document.getElementById("battleText");
+  const battleLog = document.getElementById("battleLog");
+
+  const winnerScreen = document.getElementById("winnerScreen");
+  const winnerName = document.getElementById("winnerName");
+  const winnerImg = document.getElementById("winnerImg");
+
+  let p1 = null;
+  let p2 = null;
+  let turn = 1;
+  let battleStarted = false;
+  let battleEnded = false;
+
+  async function loadPokemonNames() {
+    const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1000");
+    const data = await res.json();
+
+    data.results.forEach(pokemon => {
+      const option = document.createElement("option");
+      option.value = pokemon.name;
+      datalist.appendChild(option);
+    });
+  }
+
+  async function fetchPokemon(nameOrId) {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${String(nameOrId).trim().toLowerCase()}`);
+    if (!res.ok) throw new Error("Pokémon no encontrado");
+    return res.json();
+  }
+
+  function buildFighter(data) {
+    return {
+      name: data.name.toUpperCase(),
+      hp: 100,
+      ownTurns: 0,
+      defending: false,
+      specialDefending: false,
+      sprite: data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || "",
+      moves: {
+        normal: "Ataque básico",
+        special: "Ataque especial",
+        defend: "Defensa",
+        specialDefend: "Defensa especial"
+      }
+    };
+  }
+
+  function updateUI() {
+    p1Name.textContent = p1 ? p1.name : "Pokémon 1";
+    p2Name.textContent = p2 ? p2.name : "Pokémon 2";
+
+    p1Img.src = p1?.sprite || "";
+    p2Img.src = p2?.sprite || "";
+
+    p1HpBar.style.width = `${p1 ? p1.hp : 100}%`;
+    p2HpBar.style.width = `${p2 ? p2.hp : 100}%`;
+
+    p1HpText.textContent = p1 ? p1.hp : 100;
+    p2HpText.textContent = p2 ? p2.hp : 100;
+  }
+
+  function logMessage(text) {
+    const li = document.createElement("li");
+    li.textContent = text;
+    battleLog.prepend(li);
+  }
+
+  function chooseAction(attacker) {
+    const options = ["normal", "defend"];
+
+    if (attacker.ownTurns >= 3) {
+      options.push("special");
+    }
+
+    if (attacker.ownTurns >= 2) {
+      options.push("specialDefend");
+    }
+
+    return options[Math.floor(Math.random() * options.length)];
+  }
+
+  function resetDefenseStates(attacker) {
+    attacker.defending = false;
+    attacker.specialDefending = false;
+  }
+
+  function calculateDamage(action) {
+    if (action === "normal") return Math.floor(Math.random() * 14) + 10;       // 10-23
+    if (action === "special") return Math.floor(Math.random() * 18) + 22;      // 22-39
+    return 0;
+  }
+
+  function applyDefense(defender, damage) {
+    if (defender.specialDefending) return 0;
+    if (defender.defending) return Math.floor(damage / 2);
+    return damage;
+  }
+
+  function animateHit(targetImg) {
+    targetImg.classList.add("shake");
+    setTimeout(() => targetImg.classList.remove("shake"), 450);
+  }
+
+  function handleTurn() {
+    if (!battleStarted || battleEnded) return;
+
+    const attacker = turn === 1 ? p1 : p2;
+    const defender = turn === 1 ? p2 : p1;
+    const defenderImg = turn === 1 ? p2Img : p1Img;
+
+    turnTitle.textContent = `Turno de ${attacker.name}`;
+
+    const action = chooseAction(attacker);
+
+    const failChance = Math.random() < 0.2; // 20% de fallo
+    let text = "";
+    let damage = 0;
+
+    resetDefenseStates(attacker);
+
+    if (failChance) {
+      if (action === "defend" || action === "specialDefend") {
+        text = `${attacker.name} intentó ${attacker.moves[action === "defend" ? "defend" : "specialDefend"]}, pero falló.`;
+      } else {
+        text = `${attacker.name} intentó ${attacker.moves[action === "normal" ? "normal" : "special"]}, pero falló.`;
+      }
+    } else {
+      if (action === "defend") {
+        attacker.defending = true;
+        text = `${attacker.name} usó ${attacker.moves.defend}. Reducirá el próximo daño recibido.`;
+      } else if (action === "specialDefend") {
+        attacker.specialDefending = true;
+        text = `${attacker.name} usó ${attacker.moves.specialDefend}. Bloqueará completamente el próximo ataque recibido.`;
+      } else {
+        damage = calculateDamage(action);
+        damage = applyDefense(defender, damage);
+        defender.hp = Math.max(0, defender.hp - damage);
+
+        const moveName = action === "special" ? attacker.moves.special : attacker.moves.normal;
+        text = `${attacker.name} usó ${moveName}, hizo ${damage}% de daño y dejó a ${defender.name} con ${defender.hp}% de vida.`;
+
+        animateHit(defenderImg);
+
+        defender.defending = false;
+        defender.specialDefending = false;
+      }
+    }
+
+    attacker.ownTurns += 1;
+    battleText.textContent = text;
+    logMessage(`[Turno ${attacker.ownTurns} de ${attacker.name}] ${text}`);
+    updateUI();
+
+    if (defender.hp <= 0) {
+      battleEnded = true;
+      nextTurnBtn.disabled = true;
+      showWinner(attacker);
+      return;
+    }
+
+    turn = turn === 1 ? 2 : 1;
+  }
+
+  function showWinner(winner) {
+    winnerScreen.style.display = "block";
+    winnerName.textContent = winner.name;
+    winnerImg.src = winner.sprite;
+    battleText.textContent = `${winner.name} ganó la batalla.`;
+    turnTitle.textContent = "Batalla finalizada";
+  }
+
+  async function startBattle() {
+    const first = poke1Input.value.trim();
+    const second = poke2Input.value.trim();
+
+    if (!first || !second) {
+      battleText.textContent = "Debes elegir dos Pokémon.";
+      return;
+    }
+
+    if (first.toLowerCase() === second.toLowerCase()) {
+      battleText.textContent = "Elige dos Pokémon diferentes.";
+      return;
+    }
+
+    try {
+      const [data1, data2] = await Promise.all([
+        fetchPokemon(first),
+        fetchPokemon(second)
+      ]);
+
+      p1 = buildFighter(data1);
+      p2 = buildFighter(data2);
+
+      turn = 1;
+      battleStarted = true;
+      battleEnded = false;
+      battleLog.innerHTML = "";
+      winnerScreen.style.display = "none";
+      nextTurnBtn.disabled = false;
+
+      battleText.textContent = "La batalla está lista. Presiona 'Siguiente turno'.";
+      turnTitle.textContent = "Preparando combate";
+      updateUI();
+    } catch (error) {
+      battleText.textContent = "Uno de los Pokémon no existe. Revisa nombre o ID.";
+    }
+  }
+
+  function restartBattle() {
+    p1 = null;
+    p2 = null;
+    turn = 1;
+    battleStarted = false;
+    battleEnded = false;
+    battleLog.innerHTML = "";
+    winnerScreen.style.display = "none";
+    battleText.textContent = "Selecciona dos Pokémon y presiona 'Iniciar batalla'.";
+    turnTitle.textContent = "Esperando inicio";
+    nextTurnBtn.disabled = true;
+    updateUI();
+    poke1Input.value = "";
+    poke2Input.value = "";
+  }
+
+  startBtn.addEventListener("click", startBattle);
+  nextTurnBtn.addEventListener("click", handleTurn);
+  restartBtn.addEventListener("click", restartBattle);
+
+  loadPokemonNames();
+</script>
+
+</body>
+</html>
